@@ -18,22 +18,26 @@ int main(int argc, char *argv[])
     
     while(fgets(userInput, 512, stdin)) // Main program loop
     {
+        clearBuffer(userInput); // Clear buffer of excess input and remove newline character at the end
 
-        if(strcmp(userInput, "exit\n") == 0 ) // Ensures we can safely leave the main program loop.
+        if(strcmp(userInput, "exit") == 0 ) // Ensures we can safely leave the main program loop.
         {
             printf("Exiting shell..."); 
             break; // Ends the main program loop.
         }
      
-      
+        char** tokens = parse(userInput); //  pointer to pointers of tokenised userinput 
 
-        char** tokens = parse(userInput); //  tokens)
-        for (int i = 0; tokens[i] != NULL; i++) {
-            printf("\"%s\"\n", tokens[i]);
+        // for (int i = 0; tokens[i] != NULL; i++) {
+        //     printf("\"%s\"\n", tokens[i]);
+        // }
+        if(tokens[0] != NULL){
+            executeCommand(tokens);
         }
-        printf("$%s> ", cwd); 
         
 
+        printf("$%s> ", cwd); 
+        
     }
     free(userInput); // Free allocated memory
 }

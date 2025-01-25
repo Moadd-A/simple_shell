@@ -1,4 +1,6 @@
 #include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "header.h"
@@ -35,4 +37,30 @@ void clearBuffer(char* userInput){
           int ch;
           while((ch = getchar()) != '\n' && ch != EOF);
         }
+}
+
+int executeCommand(char** tokens){
+
+    // Create a new process
+    pid_t pid = fork(); // process id 
+
+    if(pid == -1){
+        perror("process creation failed");
+        return -1;
+    }
+    else if(pid == 0){
+        // CHILD process
+        execvp(tokens[0], tokens); // take first token and replace it with the command and take rest of tokens as arguments
+        perror("error message if it doesnt execute"); // if the above does not run print an error
+        exit(1); // exit function with status 1 to terminate processes
+    }
+    else{
+        int status;
+        waitpid(pid, &status, 0); // load the status returned from the child process into status
+
+        if(WIFEXITED(status)){ // was the child process terminated normally by exit
+            return WEXITSTATUS(status); // What was its exit status
+        }
+    }
+    return 0;
 }
