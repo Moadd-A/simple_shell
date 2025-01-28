@@ -21,8 +21,11 @@ char** parse(char input [512]){
             i++;
         }
         tokens[i] = NULL;
+
+        
     return tokens;
 }
+
 
 void clearBuffer(char* userInput){
       
@@ -42,7 +45,7 @@ void clearBuffer(char* userInput){
 int executeCommand(char** tokens){
 
     // Create a new process
-    pid_t pid = fork(); // process id 
+    pid_t pid = fork(); // process id  // parent and child process
 
     if(pid == -1){
         perror("process creation failed");
@@ -51,7 +54,7 @@ int executeCommand(char** tokens){
     else if(pid == 0){
         // CHILD process
         execvp(tokens[0], tokens); // take first token and replace it with the command and take rest of tokens as arguments
-        perror("error message if it doesnt execute"); // if the above does not run print an error
+        otherCommands(tokens);
         exit(1); // exit function with status 1 to terminate processes
     }
     else{
@@ -64,3 +67,39 @@ int executeCommand(char** tokens){
     }
     return 0;
 }
+
+void otherCommands(char** tokens){
+            // Run custom commands that aren't executables, eg getenv
+            // If doesnt work either then print error
+            if (strcmp(tokens[0], "getPath") == 0){
+                getPath(tokens);
+            }
+            else if (strcmp(tokens[0], "setPath") == 0){
+                setPath(tokens);
+            }
+            else{
+                fprintf(stderr, "The command '%s' does not exist\n", tokens[0]); // if the above does not run print an error
+            }
+        }
+
+void getPath(char** tokens){
+    if(tokens[1] != NULL){
+        fprintf(stderr, "Error: Too many parameters\n");
+    }
+    else {printf("PATH: %s \n", getenv("PATH")); }
+}
+
+void setPath(char** tokens){
+    if(tokens[1] == NULL) {
+        fprintf(stderr, "Error: Too few parameters - must include a path to set\n");
+    }
+    if(tokens[2] != NULL) {
+        fprintf(stderr, "Error: Too many parameters\n");
+    }
+    else {
+        setenv("PATH", tokens[1], 1); 
+    }
+}
+
+
+

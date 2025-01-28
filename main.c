@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
     userInput = malloc(sizeof(char) * 512); // Allocate some memory for the user's command line input
     char cwd[256];
     char *home = getenv("HOME"); // Can reduce in future (give straight as argument)
+    char *path = getenv("PATH"); // Gets the path
     chdir(home);                 // Set current directory to home, so home is the default directory for the shell
     getcwd(cwd, sizeof(cwd));
 
@@ -22,7 +23,7 @@ int main(int argc, char *argv[])
 
         if(strcmp(userInput, "exit") == 0 ) // Ensures we can safely leave the main program loop.
         {
-            printf("Exiting shell..."); 
+            printf("Exiting shell...\n"); 
             break; // Ends the main program loop.
         }
      
@@ -39,6 +40,12 @@ int main(int argc, char *argv[])
         printf("$%s> ", cwd); 
         
     }
-    free(userInput); // Free allocated memory
-}
+
     
+   if (feof(stdin)) { // Handle Ctrl + D exit
+    printf("\nExiting shell...\n");
+}
+    free(userInput); // Free allocated memory
+    setPath(path); // Reset path environment variable back to start
+}
+
