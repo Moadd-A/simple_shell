@@ -9,9 +9,9 @@ int main(int argc, char *argv[])
 {
     char *userInput; 
     userInput = malloc(sizeof(char) * 512); // Allocate some memory for the user's command line input
-    char cwd[256];
-    char *home = getenv("HOME"); // Can reduce in future (give straight as argument)
-    char *path = getenv("PATH"); // Gets the path
+    char cwd[256];                          // Current working directory
+    char *home = getenv("HOME"); // Home directory, Can reduce in future (give straight as argument)
+    char *path[2] = {NULL, getenv("PATH")}; // Gets the system path
     chdir(home);                 // Set current directory to home, so home is the default directory for the shell
     getcwd(cwd, sizeof(cwd));
 
@@ -33,10 +33,10 @@ int main(int argc, char *argv[])
         //     printf("\"%s\"\n", tokens[i]);
         // }
         if(tokens[0] != NULL){
-            executeCommand(tokens);
+            runCommands(tokens);
         }
         
-
+        getcwd(cwd, sizeof(cwd));
         printf("$%s> ", cwd); 
         
     }
@@ -46,6 +46,6 @@ int main(int argc, char *argv[])
     printf("\nExiting shell...\n");
 }
     free(userInput); // Free allocated memory
-    setPath(path); // Reset path environment variable back to start
+    setPath(path); /* MAKE SURE TO TEST SETPATH - can come back and apply the strict "ONE PURPOSE" rule later*/
+    
 }
-
