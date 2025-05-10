@@ -5,41 +5,58 @@
 #include "header.h"
 #include "methods.c"
 
+
 int main(int argc, char *argv[])
 {
-    char *userInput; 
-    userInput = malloc(sizeof(char) * 512); // Allocate some memory for the user's command line input
-    char cwd[256];                          // Current working directory
-    char *home = getenv("HOME"); // Home directory, Can reduce in future (give straight as argument)
-    char *path[2] = {NULL, getenv("PATH")}; // Gets the system path
-    chdir(home);                 // Set current directory to home, so home is the default directory for the shell
+    
+    char *userInput; //user input that we will later parse from the terminal;
+    userInput = malloc(sizeof(char) * 512);  // Allocate some memory for the user's command line input
+    char cwd[256];               // Current working directory                 
+    char *home = getenv("HOME"); // Home directory
+    char *path[3] = {NULL, getenv("PATH")}; // Gets the system path
+    chdir(home);                 // Set current directory to home, home is the default directory for the shell
     getcwd(cwd, sizeof(cwd));
+
+    loadHistory(".hist_list");
+    loadAlias(".aliases");
 
     printf("$%s> ", cwd);  // Display prompt, displays current directory
     
     while(fgets(userInput, 512, stdin)) // Main program loop
     {
         clearBuffer(userInput); // Clear buffer of excess input and remove newline character at the 1234
-
         
-        // for (int i = 0; tokens[i] != NULL; i++) {
-        //     printf("\"%s\"\n", tokens[i]);
-        // }
+        char** tokens = parse(userInput);
+        
+        if(tokens[0] != NULL && strcmp(tokens[0], "exit") == 0) { // first condition checks that we haven't got an empty input
+            if(tokens[1] != NULL){ // If exit is in the first token, but we have anoter invalid command
+                printf("Too many parameters. Please just type 'exit'\n");
+            }
+        printf("Exiting shell...\n");
+        break;
+        }
+    
+        
         if(tokens[0] != NULL){
-            runCommands(tokens);
+            runCommands(tokens, true, 0);       // Figure out if a valid command is being run 
         }
         
         getcwd(cwd, sizeof(cwd));
-        printf("$%s> ", cwd); 
-       
-        
+        printf("$%s> ", cwd);
+    }
+    
+    if (feof(stdin))
+    { // Handle Ctrl + D exit
+        printf("\nExiting shell...\n");
     }
 
-    
-   if (feof(stdin)) { // Handle Ctrl + D exit
-    printf("\nExiting shell...\n");
-}
     free(userInput); // Free allocated memory
-    setPath(path); /* MAKE SURE TO TEST SETPATH - can come back and apply the strict "ONE PURPOSE" rule later*/
+
+    saveHistory(".hist_list");
+    saveAlias(".aliases");
     
+    // Restores system path regardless of it being changed by user
+    setPath(path);  
+    // Prints restored system path 
+    printf("System path %s restored", path[1]); 
 }
